@@ -1,8 +1,10 @@
 'use client';
 
+import { LeafletTileLayer } from "@/components/features";
 import { LeafletMap } from "@/components/features/LeafletMap";
+import { useMapTileProvider } from "@/hooks/useMapTileProvider";
 import dynamic from "next/dynamic";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 const MapDetailsPanel = dynamic(() => import('../components/features/MapDetailsPanel'), { ssr: false });
 
@@ -17,6 +19,10 @@ const MainMap = () => {
     lat: number;
     lng: number;
   } | null>(null);
+
+  // Use custom hook for theme-aware tile provider management
+  const { tileProvider, currentProviderId, setProviderId } =
+    useMapTileProvider();
 
   // Handle map click for POI location selection
   const handleMapClick = useCallback(
@@ -45,6 +51,12 @@ const MainMap = () => {
     setSelectedCountry(null);
   }, []);
 
+  const tileLayerProps = useMemo(() => ({
+    url: tileProvider.url,
+    attribution: tileProvider.attribution,
+    maxZoom: tileProvider.maxZoom,
+  }), [tileProvider]);
+
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <LeafletMap
@@ -53,6 +65,11 @@ const MainMap = () => {
         onMouseMove={handleMapMouseMove}
         cursorStyle={isSelectingPOILocation ? "crosshair" : "grab"}
       >
+        <LeafletTileLayer
+          url={tileLayerProps.url}
+          attribution={tileLayerProps.attribution}
+          maxZoom={tileLayerProps.maxZoom}
+        />
       </LeafletMap>
       {/* Country Details Panel */}
       <MapDetailsPanel
