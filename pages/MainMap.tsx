@@ -2,6 +2,7 @@
 
 import { LeafletTileLayer } from "@/components/features";
 import { LeafletMap } from "@/components/features/LeafletMap";
+import { MapTileSwitcher } from "@/components/features/MapTileSwitcher";
 import { useMapTileProvider } from "@/hooks/useMapTileProvider";
 import dynamic from "next/dynamic";
 import { useCallback, useMemo, useState } from "react";
@@ -71,6 +72,12 @@ const MainMap = () => {
           maxZoom={tileLayerProps.maxZoom}
         />
       </LeafletMap>
+
+      <MapTileSwitcher
+        selectedProviderId={currentProviderId}
+        onProviderChange={setProviderId}
+      />
+
       {/* Country Details Panel */}
       <MapDetailsPanel
         country={selectedCountry}
