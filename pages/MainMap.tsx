@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useMemo, useState } from "react";
 
 const MapDetailsPanel = dynamic(() => import('../components/features/MapDetailsPanel'), { ssr: false });
+const MapControls = dynamic(() => import('../components/features/MapControls'), { ssr: false });
 
 const MainMap = () => {
   const [selectedCountry, setSelectedCountry] = useState<GeoJSON.Feature | null>(null);
@@ -77,6 +78,8 @@ const MainMap = () => {
         selectedProviderId={currentProviderId}
         onProviderChange={setProviderId}
       />
+
+      <MapControls />
 
       {/* Country Details Panel */}
       <MapDetailsPanel
