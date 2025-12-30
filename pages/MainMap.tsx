@@ -3,7 +3,9 @@
 import { LeafletTileLayer } from "@/components/features";
 import { LeafletMap } from "@/components/features/LeafletMap";
 import { MapTileSwitcher } from "@/components/features/MapTileSwitcher";
+import { MapTopBar } from "@/components/features/MapTopBar";
 import { useMapTileProvider } from "@/hooks/useMapTileProvider";
+import { POICategory } from "@/types/poi";
 import dynamic from "next/dynamic";
 import { useCallback, useMemo, useState } from "react";
 
@@ -13,6 +15,9 @@ const MapControls = dynamic(() => import('../components/features/MapControls'), 
 const MainMap = () => {
   const [selectedCountry, setSelectedCountry] = useState<GeoJSON.Feature | null>(null);
   const [isSelectingPOILocation, setIsSelectingPOILocation] = useState(false);
+  const [poiFilterCategory, setPOIFilterCategory] =
+    useState<POICategory | null>(null);
+  const [poiPanelMode, setPOIPanelMode] = useState<"list" | "add">("list");
   const [cursorCoords, setCursorCoords] = useState<{
     lat: number;
     lng: number;
@@ -49,9 +54,34 @@ const MainMap = () => {
     },
     []
   );
+
+  const handleOpenPOIPanel = useCallback((category?: POICategory) => {
+    setPOIFilterCategory(category || null);
+    setPOIInitialCoords(null);
+    setPOIPanelMode("list");
+  }, []);
+
   const handleClearSelection = useCallback(() => {
     setSelectedCountry(null);
   }, []);
+
+  const handleCategoryClick = useCallback(
+    (categoryId: string) => {
+      // Map category IDs to POI categories
+      const categoryMapping: Record<string, POICategory> = {
+        restaurants: "food-drink",
+        hotels: "lodging",
+        attractions: "tourism",
+        transit: "transport",
+      };
+
+      const poiCategory = categoryMapping[categoryId.toLowerCase()];
+      if (poiCategory) {
+        handleOpenPOIPanel(poiCategory);
+      }
+    },
+    [handleOpenPOIPanel]
+  );
 
   const tileLayerProps = useMemo(() => ({
     url: tileProvider.url,
@@ -61,6 +91,7 @@ const MainMap = () => {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
+      <MapTopBar onCategoryClick={handleCategoryClick} />
       <LeafletMap
         className="w-full h-full"
         onClick={handleMapClick}
