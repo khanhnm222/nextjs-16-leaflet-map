@@ -2,6 +2,7 @@
 
 import { LeafletTileLayer } from "@/components/features";
 import { LeafletMap } from "@/components/features/LeafletMap";
+import { MapMeasurementPanel } from "@/components/features/MapMeasurementPanel";
 import { MapTileSwitcher } from "@/components/features/MapTileSwitcher";
 import { MapTopBar } from "@/components/features/MapTopBar";
 import { useMapTileProvider } from "@/hooks/useMapTileProvider";
@@ -15,6 +16,8 @@ const MapControls = dynamic(() => import('../components/features/MapControls'), 
 const MainMap = () => {
   const [selectedCountry, setSelectedCountry] = useState<GeoJSON.Feature | null>(null);
   const [isSelectingPOILocation, setIsSelectingPOILocation] = useState(false);
+  const [isMeasurementOpen, setIsMeasurementOpen] = useState(false);
+
   const [poiFilterCategory, setPOIFilterCategory] =
     useState<POICategory | null>(null);
   const [poiPanelMode, setPOIPanelMode] = useState<"list" | "add">("list");
@@ -65,6 +68,14 @@ const MainMap = () => {
     setSelectedCountry(null);
   }, []);
 
+  const handleMeasurementClose = useCallback(() => {
+    setIsMeasurementOpen(false);
+  }, []);
+
+  const handleMeasurementOpen = useCallback(() => {
+    setIsMeasurementOpen(true);
+  }, []);
+
   const handleCategoryClick = useCallback(
     (categoryId: string) => {
       // Map category IDs to POI categories
@@ -91,7 +102,11 @@ const MainMap = () => {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      <MapTopBar onCategoryClick={handleCategoryClick} />
+      <MapTopBar
+        onCategoryClick={handleCategoryClick}
+        onMeasurementClick={handleMeasurementOpen}
+        onPOIClick={handleOpenPOIPanel}
+      />
       <LeafletMap
         className="w-full h-full"
         onClick={handleMapClick}
@@ -111,6 +126,11 @@ const MainMap = () => {
       />
 
       <MapControls />
+
+      <MapMeasurementPanel
+        isOpen={isMeasurementOpen}
+        onClose={handleMeasurementClose}
+      />
 
       {/* Country Details Panel */}
       <MapDetailsPanel

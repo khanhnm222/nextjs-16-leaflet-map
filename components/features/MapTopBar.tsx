@@ -3,17 +3,20 @@
 import { memo } from "react";
 import { Utensils, Hotel, Compass, Bus } from "lucide-react";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import MapTools from "./MapTools";
 // import { UserInfo } from "./UserInfo";
 
 const categories = [
-  { icon: Utensils, label: "Restaurants", id: "restaurants" },
-  { icon: Hotel, label: "Hotels", id: "hotels" },
+  // { icon: Utensils, label: "Restaurants", id: "restaurants" },
+  // { icon: Hotel, label: "Hotels", id: "hotels" },
   { icon: Compass, label: "Attractions", id: "attractions" },
-  { icon: Bus, label: "Transit", id: "transit" },
+  // { icon: Bus, label: "Transit", id: "transit" },
 ] as const;
 
 interface MapTopBarProps {
   onCategoryClick?: (categoryId: string) => void;
+  onMeasurementClick?: () => void;
+  onPOIClick?: () => void;
 }
 
 /**
@@ -25,6 +28,8 @@ interface MapTopBarProps {
  */
 export const MapTopBar = memo(function MapTopBar({
   onCategoryClick,
+  onMeasurementClick,
+  onPOIClick,
 }: MapTopBarProps) {
   return (
     <div className="absolute left-4 right-4 top-4 flex items-center gap-2 z-[1000]">
@@ -43,6 +48,7 @@ export const MapTopBar = memo(function MapTopBar({
             {category.label}
           </button>
         ))}
+        <MapTools onMeasurementClick={onMeasurementClick} onPOIClick={onPOIClick} />
       </div>
 
       {/* Right side icons */}
