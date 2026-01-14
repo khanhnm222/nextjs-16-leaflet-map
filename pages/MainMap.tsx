@@ -3,6 +3,7 @@
 import { LeafletTileLayer } from "@/components/features";
 import { LeafletMap } from "@/components/features/LeafletMap";
 import { MapMeasurementPanel } from "@/components/features/MapMeasurementPanel";
+import { MapSearchBar } from "@/components/features/MapSearchBar";
 import { MapTileSwitcher } from "@/components/features/MapTileSwitcher";
 import { MapTopBar } from "@/components/features/MapTopBar";
 import { useMapTileProvider } from "@/hooks/useMapTileProvider";
@@ -17,6 +18,7 @@ const MainMap = () => {
   const [selectedCountry, setSelectedCountry] = useState<GeoJSON.Feature | null>(null);
   const [isSelectingPOILocation, setIsSelectingPOILocation] = useState(false);
   const [isMeasurementOpen, setIsMeasurementOpen] = useState(false);
+  const [isPOIPanelOpen, setIsPOIPanelOpen] = useState(false);
 
   const [poiFilterCategory, setPOIFilterCategory] =
     useState<POICategory | null>(null);
@@ -47,6 +49,7 @@ const MainMap = () => {
     },
     []
   );
+
   // Handle map mouse move for cursor tracking
   const handleMapMouseMove = useCallback(
     (lat: number, lng: number) => {
@@ -57,6 +60,19 @@ const MainMap = () => {
     },
     []
   );
+
+  // Memoized callbacks to prevent unnecessary re-renders
+  const handleCountrySelect = useCallback(async (countryId: string) => {
+    try {
+      const response = await fetch(
+        `/api/countries/${encodeURIComponent(countryId)}`
+      );
+      const feature = await response.json();
+      setSelectedCountry(feature);
+    } catch (error) {
+      console.error("Error loading country GeoJSON:", error);
+    }
+  }, []);
 
   const handleOpenPOIPanel = useCallback((category?: POICategory) => {
     setPOIFilterCategory(category || null);
@@ -94,6 +110,17 @@ const MainMap = () => {
     [handleOpenPOIPanel]
   );
 
+  const handleClosePOIPanel = useCallback(() => {
+    setIsPOIPanelOpen(false);
+    setIsSelectingPOILocation(false);
+    setPOIPanelMode("list");
+    // Reset coordinates and category after a brief delay to allow panel to close smoothly
+    setTimeout(() => {
+      setPOIFilterCategory(null);
+      setPOIInitialCoords(null);
+    }, 100);
+  }, []);
+
   const tileLayerProps = useMemo(() => ({
     url: tileProvider.url,
     attribution: tileProvider.attribution,
@@ -119,6 +146,16 @@ const MainMap = () => {
           maxZoom={tileLayerProps.maxZoom}
         />
       </LeafletMap>
+
+      <MapSearchBar
+        onCountrySelect={handleCountrySelect}
+        selectedCountry={selectedCountry}
+        onClearSelection={handleClearSelection}
+        onMeasurementClick={handleMeasurementOpen}
+        onPOIClick={() => handleOpenPOIPanel()}
+        isPOIPanelOpen={isPOIPanelOpen}
+        onClosePOIPanel={handleClosePOIPanel}
+      />
 
       <MapTileSwitcher
         selectedProviderId={currentProviderId}
