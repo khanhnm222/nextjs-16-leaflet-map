@@ -26,13 +26,14 @@ interface MapTopBarProps {
  * Features:
  * - Clickable category pills to filter POIs
  */
+
 export const MapTopBar = memo(function MapTopBar({
   onCategoryClick,
   onMeasurementClick,
   onPOIClick,
 }: MapTopBarProps) {
   return (
-    <div className="absolute left-4 right-4 top-4 flex items-center gap-2 z-[1000]">
+    <div className="absolute left-4 right-4 flex items-center gap-2 z-[1000] top-1">
       {/* Spacer for search bar */}
       <div className="w-[360px]" />
 
